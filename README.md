@@ -15,18 +15,20 @@ Create an AsyncIterator over the values of an AsyncIterator, eagerly iterated.
 #### Table of Contents
 
 - [bufferAsyncIterator](#bufferasynciterator)
+  - [Parameters](#parameters)
+  - [Examples](#examples)
 
 ### bufferAsyncIterator
 
 Create an AsyncIterator from `iterable`, with the values eagerly buffered.
 
-**Parameters**
+#### Parameters
 
 - `iterable` **(AsyncIterable&lt;Value> | Iterable&lt;Value>)** The iterable whose values will be buffered.
 - `write` **Write** A function that takes `iterable` and `buffer` and returns a Promise. `buffer` will not be iterated through until it resolves. (optional, default `defaultWrite`)
 - `buffer` **(AsyncIterable&lt;Value> | Iterable&lt;Value>)** An iterable representing the data being buffered. (optional, default `[]`)
 
-**Examples**
+#### Examples
 
 ```javascript
 import bufferAsyncIterator from 'bufferAsyncIterator';
@@ -34,15 +36,19 @@ import got from 'got';
 
 async function* getWebsites(sites) {
   for (const site of sites) {
-    yield await got(site);
+    const {requestUrl} = got.head(site);
+    yield requestUrl;
   }
 }
 
 // Immediate start running the generator.
-const websiteIterator = bufferAsyncIterator(getWebsites(['google.com', 'bing.com', 'is-yahoo-still-around.com']));
+const websiteIterator = bufferAsyncIterator(getWebsites(['google.com', 'bing.com', 'yahoo.com']));
 
+// Other potentially time-consuming stuff here.
+
+// Iteration begins only after the original generator has finished.
 for await (const site of websiteIterator) {
-  // Iteration begins only after the original generator has finished.
+  console.log(site);
 }
 ```
 
